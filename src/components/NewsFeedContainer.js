@@ -2,49 +2,48 @@ import React from 'react'
 import SearchBox from './SearchBox'
 import Story from './Story'
 import Comment from './Comment'
+import './styles.css'
 
 class NewsFeedContainer extends React.Component {
+  //state used to hold the results of the search and the type of search. Type is used for conditional rendering results in return statement.
   state = {
     results: [],
     type: ""
   }
 
-  // const res = this.state.results
-
+  //searchHandler receives search params from child component when called
   searchHandler = (searchType, searchValue) => {
-
-    const type = searchType;
     fetch(`https://hn.algolia.com/api/v1/search?query=${searchValue}&tags=${searchType}`)
       .then((response) => {
         return response.json();
       })
       .then((data) => {
-        this.setState({ results: data.hits, type: type })
+        this.setState({ results: data.hits, type: searchType })
       })
   }
 
   render() {
-
-    const res = this.state.results;
-
-    return <div>
+    return <div id='mainContainer'>
       <SearchBox search={this.searchHandler} />
       <div id="resultContainer">
         {this.state.type === '' ? null : this.state.type === 'story' ? (
-          res.map(el => {
+          this.state.results.map(el => {
             return <Story
-              key={+el.objectID}
+              key={el.objectID}
               author={el.author}
               title={el.title}
               url={el.url}
             />
           })
         ) : (
-            res.map(el => {
+            this.state.results.map(el => {
               return <Comment
-                key={el.objectID}
-                text={el.comment_text}
+                key={+el.objectID}
+                objectID={el.objectID}
                 author={el.author}
+                text={el.comment_text}
+                storyTitle={el.story_title}
+                storyUrl={el.story_url}
               />
             })
           )
